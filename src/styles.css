@@ -1,0 +1,242 @@
+html {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: white;
+    padding: 0;
+    margin: 0;
+    background: rgb(48, 46, 46);
+}
+
+nav#menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 auto;
+    display: table;
+}
+
+nav#menu li {
+    display: inline-block;
+}
+
+nav#menu li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav#menu li a:hover {
+    background-color: #ddd;
+    color: black;
+    font-weight: bold;
+}
+
+li a {
+    text-decoration: none;
+    color: inherit;
+}
+
+li a:hover {
+    font-weight: bold;
+}
+
+.customLink, .customLink:visited, .customLink:hover, .customLink:active {
+      color: inherit;
+      text-decoration: none;
+      font-weight: bold;
+}
+
+.resourceLink p {
+    text-align: left;
+    color: inherit;
+    text-decoration: none;
+    font-weight: bold;
+    text-align: left;
+}
+
+.content {
+    flex: 1;
+    text-align: center;
+    display: block;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    max-width: 800px;
+    padding: 20px; 
+    background: rgb(48, 46, 46);
+    color: white; 
+    border-radius: 10px;
+    line-height:1.5;
+}
+
+.contact-box {
+    margin: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 2);
+    max-width: 300px;
+    width: 100%;
+    border: 2px solid #000000;
+    border-radius: 1px;
+}
+
+.contact-box h2 {
+    width: 100%;
+    text-align: center;
+    margin-top: 0;
+}
+
+.contact-box p {
+    text-align: left;
+    width: 100%;
+    margin-left: 0;
+}
+
+.contact-box a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contact-box a:hover {
+    font-weight: bold;
+}
+
+#contact {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 0px;
+    padding: 20px;
+}
+
+.project-box {
+    margin: 5px auto;
+    padding: 0px;
+    width: 65%;
+    max-width: 65%;
+    background: rgb(48, 46, 46);
+    color: white;
+    border-radius: 10px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.project-box img {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.project-box h2 {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.project-box p {
+    text-align: left;
+    width: 100%;
+    margin-left: 0;
+}
+
+.project-box a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.project-box pre {
+    background-color: #111111;
+    color: #f8f8f2;
+    padding: 10px;
+    margin: 0;
+    overflow-x: auto;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.project-box code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.95em;
+}
+
+.project-box span {
+    color: red;
+    font-family: 'Consolas', 'Courier New', monospace;
+    padding: 0;
+    margin: 0;
+}
+
+.projects-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+}
+
+
+pre {
+    background-color: #111111;
+    color: #f8f8f2;
+    padding: 5px;
+    text-align: left;
+    overflow-x: auto;
+    border-radius: 4px;
+}
+
+code {
+    font-family: 'Consolas', Courier, monospace;
+    font-size: 0.95em;
+    text-align: left;
+}
+
+ul {
+    list-style-type: disc;
+    padding-left: 35%;
+}
+
+code {
+    background-color: #111111;
+    color: #f8f8f2;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+footer {
+    padding: 20px;
+    margin-top: auto;
+    background: rgb (48, 46, 46);
+    color: white;
+    text-align: center;
+}
+
+footer a img {
+    margin: 0 10px;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    nav#menu ul {
+        display: block;
+    }
+    nav#menu li {
+        display: block;
+        width: 100%;
+    }
+    .project-box h2, .project-box h3, .project-box p {
+        font-size: smaller;
+    }
+}
