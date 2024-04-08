@@ -32,18 +32,19 @@
                         <img src="images/wg.jpeg" alt="WireGuard" style="width: 100%; max-width: 550px; height: auto; margin-left: 10px;">
                     </div>
                 </div>
-<p>OpenBSD is a Unix-based operating system known for its strong security, code correctness, and proactive measures to mitigate vulnerabilities. It's considered one of the most secure operating systems available due to it's small code-base and strong default security configurations compared to other distributions such as Debian and Fedora.</p>
-<p>WireGuard is a VPN protocol released in 2015 that has gained traction due to its faster performance compared to older VPN protocols such as IPsec and OpenVPN. Similar to OpenBSD, WireGuard offers a smaller attack surface due to its smaller code base. As of writing this, WireGuard has roughly 4,000 lines of code compared to the 400,000 lines of code in IPSec and 70,000 lines of code in OpenVPN.</p>
+<p>OpenBSD is a Unix-like operating system known for its strong security, code correctness, and proactive measures to mitigate vulnerabilities. It's considered one of the most secure operating systems available due to it's small code-base and strong default security configurations compared to other distributions such as Debian and Fedora.</p>
+<p>WireGuard is a VPN protocol released in 2015 that has gained traction due to its faster performance compared to older VPN protocols such as IPsec and OpenVPN. Similar to OpenBSD, WireGuard has a small attack surface due to its smaller code base compared to other VPN protocols. As of writing this, WireGuard has roughly 4,000 lines of code compared to the 400,000 lines of code in IPSec and 70,000 lines of code in OpenVPN.</p>
 <p>When used together, WireGuard and OpenBSD form a very solid and secure VPN server, great for accessing remote clients securely over SSH. The system's small footprint allows it to use less than 40MB of RAM even with active VPN and SSH sessions, making it ideal for running on less powerful hardware.</p>
 <p>Due to low system overhead it requires to run, I'd recommend getting the cheapest system you can with IPv4 routing (depending on how much bandwidth you need) since OpenBSD and WireGuard are not resource intensive at all. I personally use Vultr for hosting most of my VPS and have been for over a year now and never had any issues with them service wise, even while they were doing maintenance or upgrading servers. Vultr also has a great referral program where new users can earn $100 in credits for the first year. Referral link: <a href="https://www.vultr.com/?ref=9600105-8H"><b>https://www.vultr.com/?ref=9600105-8H</b></a></p>
+<p>Prior to installing, I highly recommend reading the manual pages for OpenBSD to learn more about how the system functions and command usage if you aren't familiar with the operating system. Everything is very well documented on their website: <a href="https://man.openbsd.org"><b>https://man.openbsd.org</b></a></p>
+
 <h2>Server Setup & Configuration:</h2>
 <p>After installing OpenBSD on your cloud based server and hardening SSH connectivity, execute the following commands to ensure that the system and packages are up to date. <b>Note:</b> It is important to run the following commands in the sequence shown here:</p><pre>
 <code><span>root@openbsd#</span> syspatch</code>
-<code><span>root@openbsd#</span> sysmerge -d</code>
 <code><span>root@openbsd#</span> pkg_add -Uu</code>
 <code><span>root@openbsd#</span> reboot</code></pre>
 
-<p><code>syspatch</code> is used to apply binary patches to the system ensuring that the base system's security updates and patches are applied.<br><code>sysmerge -d</code> merges system configuration files and deletes files that are no longer needed.<br><code>pkg_add -Uu</code> updates all installed packages to their latest versions.<br><code>reboot</code> to apply changes and reload kernel.</p>
+<p><code>syspatch</code> is used to apply binary patches to the system ensuring that the base system's security updates and patches are applied.<br><code>pkg_add -Uu</code> updates all installed packages to their latest versions.<br><code>reboot</code> to ensure that all changes are applied and to reload the kernel.</p>
 
 <p>Install the necessary software packages that will be used for key generation, routing configuration, and text editing:</p><pre>
 <code><span>root@openbsd#</span> pkg_add wireguard-tools vim</pre></code>
@@ -97,7 +98,7 @@ pass in inet proto udp from any to any port &lt;SERVER-LISTEN-PORT&gt;
 # Translate outgoing traffic from wg0 to use the primary interface vio0 via NAT (change vio0 to primary interface if different)
 pass out on egress inet from (wg0:network) nat-to (vio0:0)</code></pre>
 
-<p>Restart the PF firewall:</p><pre>
+<p>Reload the PF firewall with the newly added rules:</p><pre>
 <code><span>root@openbsd#</span> pfctl -f /etc/pf.conf</code></pre>
 
 <p>Open the <code>vio0</code> network configuration file:</p><pre>
@@ -174,6 +175,9 @@ PersistentKeepalive = 25
 <p>To start a VPN connection on a client you can run:</p><pre>
 <code><span style="color: rgb(21, 153, 21);">client@debian:~$</span> sudo wg-quick up wg0</code></pre>
 
+<p>You can verify the VPN connection by running the following <code>curl</code> command which should return with the IP address of your OpenBSD VPN server:</p><pre>
+<code><span style="color: rgb(21, 153, 21);">client@debian:~$</span> curl ifconfig.me</code></pre>
+
 <p>To stop a VPN connection on a client you can run:</p><pre>
 <code><span style="color: rgb(21, 153, 21);">client@debian:~$</span> sudo wg-quick down wg0</code></pre>
 
@@ -187,8 +191,10 @@ PersistentKeepalive = 25
         <li><a href="https://man.openbsd.org/" class="customLink">https://man.openbsd.org/</a></li>
         <li><a href="https://www.openbsdhandbook.com" class="customLink">https://www.openbsdhandbook.com</a></li>
         <li><a href="https://wiki.gentoo.org/wiki/WireGuard" class="customLink">https://wiki.gentoo.org/wiki/WireGuard</a></li>
+	<li><a href="https://docs.vultr.com/install-wireguard-vpn-server-on-openbsd-7-0" class="customLink">https://docs.vultr.com/install-wireguard-vpn-server-on-openbsd-7-0</a></li>
         <li><a href="https://www.youtube.com/watch?v=szGsh5J9bzY" class="customLink">Self Hosted WireGuard VPN on OpenBSD | Mental Outlaw</a></li>
     </ul>
+    
     <footer style="text-align: center;">
         <a href="https://github.com/joshfarias">
             <img src="images/github.png" alt="GitHub Profile" style="width: 30px; height: 30px; margin-right: 5px;">
