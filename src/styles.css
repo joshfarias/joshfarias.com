@@ -49,7 +49,37 @@ li a:hover {
 .customLink, .customLink:visited, .customLink:hover, .customLink:active {
       color: inherit;
       text-decoration: none;
+      cursor: pointer;
       font-weight: bold;
+      overflow: hidden;
+      display: inline-block;
+}
+
+.customLink h2, .customLink img {
+      font-size: 1.3rem;
+      max-width: 100%;
+      height: auto;
+}
+
+.customLink p {
+      font-size: 0.75rem;
+      font-weight: normal;
+}
+
+.customLink h2, .customLink img, .customLink h1 {
+	transition: opacity 0.25s ease;
+}
+
+.customLink:hover h2, .customLink:focus h2 {
+	opacity: 0.75;
+}
+
+.customLink:hover img, .customLink:focus img {
+	opacity: 0.75;
+}
+
+.customLink:hover h1, .customLink:focus h1 {
+	opacity: 0.75;
 }
 
 .resourceLink p {
@@ -239,4 +269,21 @@ footer a {
     .project-box h2, .project-box h3, .project-box p {
         font-size: smaller;
     }
+    .project-box pre, pre {
+        font-size: smaller;
+    }
+    .project-box code, code {
+        font-size: smaller;
+    }
+    .project-box {
+        width: 85%;
+	max-width: 85%;
+    }
+    ul {
+        padding-left: 20px;
+    }
+    li {
+	margin-left: 0;
+    }	
+
 }
