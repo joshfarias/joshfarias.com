@@ -39,12 +39,15 @@
 <p>Prior to installing, I highly recommend reading the manual pages for OpenBSD to learn more about how the system functions and command usage if you aren't familiar with the operating system. Everything is very well documented on their website: <a href="https://man.openbsd.org"><b>https://man.openbsd.org</b></a></p>
 
 <h2>Server Setup & Configuration:</h2>
-<p>This guide assumes you are using OpenBSD 7.4 or newer. It is vital to use at least version 6.8, as this introduced native WireGuard kernel support <code>(wg(4))</code>. This built-in implementation provides better performance and security than the external tools used in older versions of OpenBSD.</p> <p>After installing OpenBSD on your cloud based server and hardening SSH connectivity, execute the following commands to ensure that the system and packages are up to date. <b>Note:</b> It is important to run the following commands in the sequence shown here:</p><pre>
+<p>After installing OpenBSD on your cloud based server and hardening SSH connectivity, execute the following commands to ensure that the system and packages are up to date. <b>Note:</b> It is important to run the following commands in the sequence shown here:</p><pre>
 <code><span>root@openbsd#</span> syspatch</code>
 <code><span>root@openbsd#</span> pkg_add -Uu</code>
 <code><span>root@openbsd#</span> reboot</code></pre>
 
 <p><code>syspatch</code> is used to apply binary patches to the system ensuring that the base system's security updates and patches are applied.<br><code>pkg_add -Uu</code> updates all installed packages to their latest versions.<br><code>reboot</code> to ensure that all changes are applied and to reload the kernel.</p>
+
+<p>Install the following software packages that will be used for key generation, routing configuration, and text editing:</p><pre>
+<code><span>root@openbsd#</span> pkg_add wireguard-tools vim</pre></code>
 
 <p>Enable IPv4 and IPv6 forwarding if you plan to use IPv6:</p><pre>
 <code><span>root@openbsd#</span> sysctl net.inet.ip.forwarding=1</code>
@@ -56,8 +59,6 @@
 
 <p>Make a directory for WireGuard and navigate into the newly created directory:</p><pre>
 <code><span>root@openbsd#</span> mkdir -p /etc/wireguard && cd /etc/wireguard</code></pre>
-
-
 
 <p>To securely connect a client and a server using WireGuard, it is essential to generate a cryptographic key pair. These keys facilitate client authentication and the encryption-decryption process for data transmission.</p>
 <p>The private and public key pairs are primarily for authentication purposes. When a client tries to establish a connection with the server, it authenticates itself by presenting its public key, which the server will be configured to recognize as trusted. The server also authenticates itself to the client by providing its public key. This mutual authentication confirms the identities of both parties, ensuring that communications are between legitimate endpoints.</p>
