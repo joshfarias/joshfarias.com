@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Social Engineering: The Human Attack Surface - Josh Farias">
+    <meta name="author" content="Joshua Farias">
+    <title>Social Engineering: The Human Attack Surface | Josh Farias</title>
+    <link rel="icon" type="image/png" href="https://www.joshfarias.com/images/favicon.png"/>
+    <link rel="preconnect" href="https://www.joshfarias.com" crossorigin>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* ===== ARTICLE HERO ===== */
+        .article-hero {
+            position: relative;
+            padding: 48px 24px 40px;
+            text-align: center;
+        }
+        .article-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 100%, rgba(255, 95, 86, 0.05) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; color: #777; margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #27c93f; }
+
+        .article-hero .tags {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 8px; margin-bottom: 16px;
+        }
+        .tag {
+            padding: 4px 12px;
+            background: rgba(255, 95, 86, 0.08); border: 1px solid rgba(255, 95, 86, 0.2);
+            border-radius: 20px; font-size: 0.65rem; color: #ff5f56;
+            letter-spacing: 0.5px;
+            transition: background 0.25s;
+        }
+        .tag:hover { background: rgba(255, 95, 86, 0.15); }
+        .tag-yellow {
+            background: rgba(255, 189, 46, 0.06); border-color: rgba(255, 189, 46, 0.15);
+            color: #ffbd2e;
+        }
+        .tag-yellow:hover { background: rgba(255, 189, 46, 0.12); }
+        .tag-green {
+            background: rgba(39, 201, 63, 0.08); border: 1px solid rgba(39, 201, 63, 0.2);
+            color: #27c93f;
+        }
+        .tag-green:hover { background: rgba(39, 201, 63, 0.15); }
+
+        .article-hero h1 {
+            font-size: 2rem; color: #fff; margin-bottom: 10px; letter-spacing: -0.5px;
+        }
+        .article-hero .subtitle {
+            font-size: 0.82rem; color: #999; max-width: 620px; margin: 0 auto;
+        }
+
+        /* ===== ARTICLE BODY ===== */
+        .article {
+            max-width: 900px; margin: 0 auto;
+            padding: 48px 24px 60px;
+        }
+
+        .article p {
+            color: #ccc; margin-bottom: 18px; font-size: 0.88rem;
+        }
+
+        .article h2 {
+            color: #fff; font-size: 1.3rem;
+            margin-top: 48px; margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            position: relative;
+        }
+        .article h2::before {
+            content: '// ';
+            color: #27c93f;
+        }
+
+        .article strong, .article b { color: #fff; }
+
+        /* ===== TABLE OF CONTENTS ===== */
+        .toc {
+            background: #222; border: 1px solid #2e2e2e;
+            border-radius: 8px; padding: 20px 24px;
+            margin-bottom: 36px;
+            transition: border-color 0.3s;
+        }
+        .toc:hover { border-color: #3a3a3a; }
+        .toc h3 {
+            font-size: 0.82rem; color: #fff; margin-bottom: 12px;
+        }
+        .toc ol {
+            padding-left: 20px; counter-reset: toc;
+            list-style: none;
+        }
+        .toc li {
+            counter-increment: toc;
+            padding: 4px 0; font-size: 0.78rem;
+        }
+        .toc li::before {
+            content: counter(toc) ". ";
+            color: #27c93f; font-weight: bold;
+        }
+        .toc a { color: #aaa; transition: color 0.2s; }
+        .toc a:hover { color: #27c93f; }
+
+        /* ===== SE GRID ===== */
+        .se-intro {
+            font-size: 0.88rem;
+            color: #bbb;
+            max-width: 750px;
+            margin-bottom: 32px;
+        }
+
+        .se-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .se-card {
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 22px;
+            border-left: 3px solid #ff5f56;
+            transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+        }
+        .se-card:hover {
+            background: #242424;
+            border-left-color: #ffbd2e;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .se-card .threat-level {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+        .threat-high { color: #ff5f56; }
+        .threat-med { color: #ffbd2e; }
+
+        .se-card h3 {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .se-card p {
+            font-size: 0.78rem;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .se-card .example {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: #111;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            color: #8be9fd;
+            border-left: 2px solid #333;
+        }
+        .se-card .example span { color: #777; }
+
+        /* Psychology callout */
+        .psych-box {
+            background: linear-gradient(135deg, rgba(39, 201, 63, 0.05), rgba(139, 233, 253, 0.03));
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 28px;
+            margin-bottom: 32px;
+        }
+
+        .psych-box h3 {
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .psych-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .psych-list li {
+            font-size: 0.78rem;
+            color: #bbb;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .psych-list li:hover {
+            background: rgba(0,0,0,0.45);
+        }
+
+        .psych-list .principle {
+            color: #ffbd2e;
+            font-weight: bold;
+        }
+
+        /* Defense checklist */
+        .section-label {
+            font-size: 0.7rem;
+            color: #27c93f;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .defense-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        .defense-item {
+            background: #1e1e1e;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 18px;
+            text-align: center;
+            transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+        .defense-item:hover {
+            border-color: #27c93f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .defense-item .def-icon {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .defense-item h4 {
+            font-size: 0.8rem;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .defense-item p {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        /* ===== READING PROGRESS BAR ===== */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: #ff5f56;
+            z-index: 150;
+            width: 0;
+            transition: width 0.1s linear;
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .reading-progress { transition: none; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .article-hero h1 { font-size: 1.4rem; }
+            .article { padding: 32px 18px 48px; }
+            .se-grid,
+            .psych-list { grid-template-columns: 1fr; }
+            .defense-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .defense-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<a href="#article-content" class="skip-link">Skip to content</a>
+
+<!-- Reading progress bar -->
+<div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav aria-label="Main navigation">
+    <div class="nav-inner">
+        <a href="../" class="nav-brand"><span>&gt;</span> joshfarias.com</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+        <ul class="nav-links" id="navLinks" role="list">
+            <li><a href="../">Home</a></li>
+            <li><a href="../projects" class="active">Projects</a></li>
+            <li><a href="../#about">About</a></li>
+            <li><a href="../#contact">Contact</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ===== ARTICLE HERO ===== -->
+<div class="article-hero">
+    <a href="../projects" class="back-link">&#8592; Back to Projects</a>
+    <div class="tags">
+        <span class="tag">Social Engineering</span>
+        <span class="tag">Phishing</span>
+        <span class="tag">OSINT</span>
+        <span class="tag tag-yellow">Psychology</span>
+        <span class="tag tag-green">Wireless</span>
+        <span class="tag tag-green">Defense</span>
+    </div>
+    <h1>The Human Attack Surface</h1>
+    <p class="subtitle">Social engineering attack vectors, the psychology behind them, and how to build organizational resilience against human-layer exploits.</p>
+</div>
+
+<hr class="divider" style="margin-top: 8px;">
+
+<!-- ===== ARTICLE ===== -->
+<article class="article" id="article-content">
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#mitnick">Kevin Mitnick &amp; The Art of Deception</a></li>
+            <li><a href="#attack-vectors">Attack Vectors</a></li>
+            <li><a href="#osint-set">OSINT &amp; The Social Engineering Toolkit</a></li>
+            <li><a href="#pwnagotchi">Pwnagotchi: AI-Driven Wireless Capture</a></li>
+            <li><a href="#psychology">The Psychology Behind It</a></li>
+            <li><a href="#countermeasures">Countermeasures</a></li>
+        </ol>
+    </div>
+
+    <!-- Overview -->
+    <section id="overview">
+        <p>Social engineering is a method of manipulation employed by threat actors to deceive and exploit individuals, targeting human psychology rather than technology itself. It remains the most effective initial access vector in real-world breaches&mdash;over 90% of successful cyberattacks begin with some form of social engineering. No firewall, IDS, or endpoint agent can fully compensate for a manipulated human decision.</p>
+
+        <p>Threat actors often use <b>open-source intelligence (OSINT)</b> to gather information about their potential victims. What they learn through OSINT is then used to design attacks tailored to the interests, habits, and vulnerabilities of a particular individual or organization. A threat actor will exploit their targets by appealing to emotions&mdash;trust, fear, curiosity, and greed&mdash;with the goal of making the person act impulsively without investigating further.</p>
+
+        <p>The history of social engineering predates the digital age, but no figure embodies it more than <b>Kevin Mitnick</b>&mdash;whose exploits demonstrated that the human element is, and always will be, the weakest link in any security architecture.</p>
+    </section>
+
+    <!-- Kevin Mitnick -->
+    <h2 id="mitnick">Kevin Mitnick &amp; The Art of Deception</h2>
+
+    <p>Kevin Mitnick was once the FBI's most wanted hacker, but the majority of his intrusions relied not on technical exploits but on social engineering. By impersonating IT staff, technicians, and corporate employees over the phone, Mitnick convinced people to hand over credentials, dial-in numbers, and internal system access. He compromised organizations including Motorola, Nokia, Sun Microsystems, and Pacific Bell&mdash;often without writing a single line of exploit code.</p>
+
+    <p>Mitnick's approach followed a pattern that remains the blueprint for modern social engineering: <b>research the target</b> through publicly available information (what we now call OSINT), <b>build a credible pretext</b> using internal jargon and organizational knowledge, and <b>exploit trust</b> to extract credentials or access. His book <i>The Art of Deception</i> (2002) documented these techniques in detail and remains one of the most referenced texts in security awareness training.</p>
+
+    <p>What made Mitnick effective was his understanding that people inherently want to be helpful. A convincing phone call from someone who sounds like they belong&mdash;who knows the right names, the right systems, the right terminology&mdash;bypasses every technical control in place. This principle hasn't changed. The tools have evolved (phishing kits, deepfake audio, AI-generated pretexts), but the underlying psychology is the same one Mitnick exploited decades ago.</p>
+
+    <!-- Attack Vectors -->
+    <h2 id="attack-vectors">Attack Vectors</h2>
+
+    <div class="se-grid">
+        <div class="se-card fade-in">
+            <p class="threat-level threat-high">HIGH THREAT</p>
+            <h3>Phishing</h3>
+            <p>Crafted emails or messages impersonating trusted entities to extract credentials, deploy payloads, or redirect to spoofed login portals. Spear phishing targets specific individuals with researched pretexts.</p>
+            <div class="example">
+                <span>Example vector:</span> Spoofed IT department email requesting password reset via a cloned SSO page with a typosquatted domain.
+            </div>
+        </div>
+        <div class="se-card fade-in">
+            <p class="threat-level threat-high">HIGH THREAT</p>
+            <h3>Pretexting</h3>
+            <p>The attacker fabricates a scenario (pretext) to build trust and extract information. Unlike phishing, this often involves sustained, interactive deception over the phone or in person.</p>
+            <div class="example">
+                <span>Example vector:</span> Calling the help desk as a "new employee" who lost their badge, requesting a temporary access code and VPN credentials.
+            </div>
+        </div>
+        <div class="se-card fade-in">
+            <p class="threat-level threat-med">MEDIUM THREAT</p>
+            <h3>Baiting</h3>
+            <p>Exploits curiosity or greed by offering something enticing. Malware-laden USB drives left in parking lots, free software downloads with embedded backdoors, or fake job offers containing weaponized documents.</p>
+            <div class="example">
+                <span>Example vector:</span> USB flash drive labeled "Salary_Review_2026.xlsx" dropped near the target office entrance, containing a HID payload.
+            </div>
+        </div>
+        <div class="se-card fade-in">
+            <p class="threat-level threat-med">MEDIUM THREAT</p>
+            <h3>Tailgating / Piggybacking</h3>
+            <p>Gaining physical access to restricted areas by following authorized personnel through secured doors. Often combined with pretexting&mdash;wearing a uniform, carrying boxes, or pretending to talk on the phone.</p>
+            <div class="example">
+                <span>Example vector:</span> Approaching a badge-access door carrying a stack of boxes and asking an employee to "hold the door."
+            </div>
+        </div>
+        <div class="se-card fade-in">
+            <p class="threat-level threat-high">HIGH THREAT</p>
+            <h3>Vishing / Smishing</h3>
+            <p>Voice phishing (vishing) and SMS phishing (smishing) use phone calls and text messages to create urgency. Caller ID spoofing makes the attack appear to originate from legitimate numbers.</p>
+            <div class="example">
+                <span>Example vector:</span> Spoofed call from "your bank's fraud department" asking you to confirm your account number to "stop a suspicious transaction."
+            </div>
+        </div>
+        <div class="se-card fade-in">
+            <p class="threat-level threat-med">MEDIUM THREAT</p>
+            <h3>Watering Hole</h3>
+            <p>Compromising a website frequently visited by the target group. Instead of attacking the target directly, the attacker infects a trusted third-party site and waits for the victim to visit.</p>
+            <div class="example">
+                <span>Example vector:</span> Injecting a malicious iframe into a niche industry forum that the target organization's employees use daily.
+            </div>
+        </div>
+    </div>
+
+    <!-- OSINT & SET -->
+    <h2 id="osint-set">OSINT &amp; The Social Engineering Toolkit</h2>
+
+    <p>Modern social engineering attacks typically begin with an OSINT reconnaissance phase. A threat actor analyzes a target's social media presence, public records, professional profiles, and online activity to build a profile that informs the attack. The more specific the pretext, the more convincing the attack&mdash;this is what separates generic spam from targeted spear phishing.</p>
+
+    <p>Consider the following scenario: a threat actor discovers through OSINT that an individual trades cryptocurrency and uses the Blockchain exchange. Recent posts on social media reveal the individual expressed concerns over security breaches on a different exchange. The threat actor crafts a phishing email prompting the target to change their Blockchain password due to an "attempted security breach"&mdash;preying directly upon the security concerns they had already expressed publicly.</p>
+
+    <p>The <b>Social Engineering Toolkit (SET)</b> is an open-source framework designed for exactly this type of attack. SET can clone the HTML and CSS from a legitimate login page, host the replica on a command-and-control server, and capture any credentials the victim enters on the spoofed site. The attacker combines this technical infrastructure with non-technical tactics&mdash;spoofed email addresses, valid-looking security certificates, and typosquatted domains&mdash;to make the entire chain appear legitimate.</p>
+
+    <p>This is the reality of modern social engineering: it is rarely just a technical exploit or just a human manipulation. It is a combination of both. The attacker uses technology to build a convincing stage (cloned websites, spoofed emails, C2 infrastructure) and psychology to get the target to walk onto it. Mitnick did the same thing with a telephone and a notepad&mdash;the tools have changed, but the methodology is identical.</p>
+
+    <!-- Pwnagotchi -->
+    <h2 id="pwnagotchi">Pwnagotchi: AI-Driven Wireless Capture</h2>
+
+    <p>Mitnick proved that physical access is often the ultimate force multiplier for social engineering. Physical proximity attacks go hand-in-hand with the pretexting and tailgating techniques described above&mdash;while an attacker builds rapport at the front desk or follows an employee through a secured door, a small device in their pocket can be passively harvesting wireless credentials from the surrounding environment. The <b>Pwnagotchi</b> is one such device&mdash;an open-source, AI-powered tool built on a Raspberry Pi Zero W that automates WPA/WPA2 handshake capture.</p>
+
+    <img src="../images/pwnagotchi.png" alt="Pwnagotchi e-ink display showing channel hopping across 4 access points, AI mode enabled, 70% memory usage, 100% CPU, and 40 minutes of uptime" loading="lazy" style="width: 100%; max-width: 600px; display: block; margin: 24px auto; border-radius: 8px; border: 1px solid #2a2a2a;">
+
+    <p>The Pwnagotchi uses an <b>A2C (Advantage Actor-Critic)</b> reinforcement learning model to optimize its handshake capture strategy over time. It channel-hops across nearby access points, sends targeted deauthentication frames to force client reconnections, and captures the resulting WPA/WPA2 handshakes. The AI learns from each session&mdash;adapting its timing, channel selection, and deauthentication patterns to maximize the number of handshakes collected in a given environment.</p>
+
+    <p>The device runs headless on a Raspberry Pi Zero W with a Waveshare e-ink display that provides real-time status: the number of access points in range, captured handshakes (PWND), memory and CPU usage, and an expressive face that reflects how well the AI is performing. The low power draw and small form factor make it easy to conceal during a physical engagement.</p>
+
+    <p>Captured handshake files (<code>.pcap</code>) can be transferred to a more powerful machine and cracked offline using tools like <b>Hashcat</b> or <b>Aircrack-ng</b> with wordlists such as <code>rockyou.txt</code>. Weak or commonly reused Wi-Fi passwords can be recovered in seconds, granting the attacker network access without ever interacting with a single user.</p>
+
+    <p>This is where physical security and wireless security intersect. A social engineering engagement that gets an attacker inside the building&mdash;even briefly&mdash;can also yield wireless credentials passively. The Pwnagotchi demonstrates why organizations need to treat wireless security with the same rigor as perimeter defense: strong WPA3 enforcement, complex PSKs, 802.1X enterprise authentication, wireless intrusion detection, and physical access controls that limit unauthorized proximity to access points.</p>
+
+    <!-- Psychology -->
+    <h2 id="psychology">The Psychology Behind It</h2>
+
+    <p>Every social engineering attack&mdash;from Mitnick's phone calls to SET-powered phishing campaigns to a Pwnagotchi in someone's pocket&mdash;exploits the same core emotional triggers: <b>trust</b>, <b>fear</b>, <b>curiosity</b>, and <b>greed</b>. The cryptocurrency phishing example works because it preys on fear. Baiting with a USB drive labeled "Salary Review" exploits curiosity and greed. Pretexting as IT staff leverages trust and authority. These emotional triggers map directly to Cialdini's established framework of influence.</p>
+
+    <div class="psych-box fade-in">
+        <h3>Cialdini's 6 Principles of Influence</h3>
+        <p style="font-size: 0.78rem; color: #aaa; margin-bottom: 14px;">Social engineers weaponize the same psychological principles that drive normal human behavior. Mitnick relied heavily on authority and liking. Phishing campaigns exploit scarcity and social proof. Recognizing these patterns is the first step in building resilience.</p>
+        <ul class="psych-list">
+            <li><span class="principle">Reciprocity</span> &mdash; "I did something for you, now you owe me." Attackers offer help or information before making a request.</li>
+            <li><span class="principle">Commitment</span> &mdash; Once someone agrees to a small request, they're more likely to comply with larger ones. Foot-in-the-door escalation.</li>
+            <li><span class="principle">Social Proof</span> &mdash; "Everyone else is doing it." Fabricated testimonials, fake urgency around widespread adoption, or impersonating colleagues.</li>
+            <li><span class="principle">Authority</span> &mdash; Impersonating someone with power&mdash;IT admin, CEO, law enforcement&mdash;to bypass critical thinking.</li>
+            <li><span class="principle">Liking</span> &mdash; People comply more readily with those they find agreeable. Rapport building, flattery, and finding common ground.</li>
+            <li><span class="principle">Scarcity</span> &mdash; "Act now or lose access." Artificial time pressure forces hasty decisions that bypass rational analysis.</li>
+        </ul>
+    </div>
+
+    <!-- Countermeasures -->
+    <h2 id="countermeasures">Building Resilience</h2>
+
+    <p>While technology plays an essential role in facilitating and defending against social engineering attacks, the human element remains the most critical factor. Many anti-viruses, email filters, and firewalls rely on blocklists of known command-and-control sites, making zero-day threats difficult to detect and block&mdash;even with more advanced security apparatuses such as IDPS systems. Implementing strict access controls and following the <b>principle of least privilege</b> is essential for limiting the damage that can be done once an attacker gains initial access through social engineering. As Mitnick himself argued, end-user education in identifying social engineering attacks is the single most effective measure for reducing organizational vulnerability.</p>
+
+    <div class="defense-grid">
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128272;</span>
+            <h4>Verify Identity</h4>
+            <p>Always confirm requests through a separate, trusted channel. Call back on a known number. Never trust caller ID alone.</p>
+        </div>
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128736;</span>
+            <h4>Security Training</h4>
+            <p>Regular phishing simulations and awareness programs. Employees should be able to identify pretexting and urgency tactics.</p>
+        </div>
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128274;</span>
+            <h4>MFA Everywhere</h4>
+            <p>Multi-factor authentication limits the damage of stolen credentials. Even if a phished password is captured via SET, MFA blocks account access. Hardware tokens (FIDO2) are the strongest option.</p>
+        </div>
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128220;</span>
+            <h4>Clear Policies</h4>
+            <p>Documented procedures for credential resets, access requests, and financial transfers. No exceptions for "urgent" requests.</p>
+        </div>
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128681;</span>
+            <h4>Report Culture</h4>
+            <p>Foster a blame-free environment for reporting suspicious interactions. Faster reporting limits attacker dwell time.</p>
+        </div>
+        <div class="defense-item fade-in">
+            <span class="def-icon">&#128187;</span>
+            <h4>Technical Controls</h4>
+            <p>Email filtering, DMARC/SPF/DKIM, URL sandboxing, USB device policies, and network segmentation as layered defenses.</p>
+        </div>
+    </div>
+
+</article>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="footer-links">
+        <a href="https://github.com/joshfarias" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/joshuafarias" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+        </a>
+    </div>
+    <p>Josh Farias | 2026</p>
+</footer>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">&#8593;</button>
+
+<script>
+(function () {
+    "use strict";
+
+    // Mobile nav
+    var toggle = document.getElementById("navToggle");
+    var links = document.getElementById("navLinks");
+    toggle.addEventListener("click", function () {
+        var isOpen = links.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", isOpen);
+    });
+    links.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", function () {
+            links.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+        });
+    });
+
+    // Reading progress bar
+    var progressBar = document.getElementById("readingProgress");
+    var article = document.getElementById("article-content");
+    window.addEventListener("scroll", function () {
+        var articleTop = article.offsetTop;
+        var articleHeight = article.offsetHeight;
+        var scrolled = window.scrollY - articleTop;
+        var viewableHeight = articleHeight - window.innerHeight;
+        if (scrolled < 0) {
+            progressBar.style.width = "0";
+        } else if (scrolled >= viewableHeight) {
+            progressBar.style.width = "100%";
+        } else {
+            progressBar.style.width = ((scrolled / viewableHeight) * 100) + "%";
+        }
+    }, { passive: true });
+
+    // Scroll to top button
+    var scrollBtn = document.getElementById("scrollTop");
+    window.addEventListener("scroll", function () {
+        if (window.scrollY > 400) {
+            scrollBtn.classList.add("visible");
+        } else {
+            scrollBtn.classList.remove("visible");
+        }
+    }, { passive: true });
+
+    scrollBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Fade-in on scroll (Intersection Observer)
+    var fadeEls = document.querySelectorAll(".fade-in");
+    if ("IntersectionObserver" in window) {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        fadeEls.forEach(function (el) { observer.observe(el); });
+    } else {
+        fadeEls.forEach(function (el) { el.classList.add("visible"); });
+    }
+})();
+</script>
+
+</body>
+</html>
